@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from flask import Flask
 
 app = Flask(__name__)
@@ -9,7 +8,7 @@ def home():
 
 if __name__ == "__main__":
     app.run(debug=True)
-=======
+
 from flask import Flask, render_template, request, redirect, session
 from models import db, User, Event, Registration
 
@@ -89,4 +88,3 @@ def create_event():
     db.session.add(event)
     db.session.commit()
     return redirect('/dashboard')
->>>>>>> 1e3516b49ac840eb4ed51aa32002165853d202b2
