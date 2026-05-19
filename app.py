@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, session
-from models import db, User, Event, Registration
+from models import db, User, Event, Registration, Club
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
@@ -24,7 +26,7 @@ def register():
         user = User(
             username=request.form['username'],
             email=request.form['email'],
-            password=request.form['password']
+            password=generate_password_hash(request.form['password'])
         )
         db.session.add(user)
         db.session.commit()
@@ -35,12 +37,8 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.query.filter_by(
-            email=request.form['email'],
-            password=request.form['password']
-        ).first()
-
-        if user:
+        user = User.query.filter_by(email=request.form['email']).first()
+        if user and check_password_hash(user.password, request.form['password']):
             session['user_id'] = user.id
             return redirect('/dashboard')
 
@@ -52,16 +50,18 @@ def dashboard():
         return redirect('/login')
 
     events = Event.query.all()
-    return render_template('dashboard.html', events=events)
+    clubs = Club.query.all()
+    return render_template('dashboard.html', events=events, clubs=clubs)
 
-@app.route('/create_event', methods=['POST'])
-def create_event():
-    event = Event(
-        title=request.form['title'],
+@app.route('/create_club', methods=['POST'])
+def create_club():
+    if 'user_id' not in session:
+        return redirect('/login')
+    club = Club(
+        name=request.form['name'],
         description=request.form['description'],
-        date=request.form['date'],
         created_by=session['user_id']
     )
-    db.session.add(event)
+    db.session.add(club)
     db.session.commit()
     return redirect('/dashboard')
