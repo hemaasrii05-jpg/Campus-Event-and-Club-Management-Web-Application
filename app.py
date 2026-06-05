@@ -1,22 +1,7 @@
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "It works!"
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
 from flask import Flask, render_template, request, redirect, session
 from models import db, User, Event, Registration
 
 app = Flask(__name__)
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'secret123'
 
@@ -77,14 +62,5 @@ def create_event():
     db.session.commit()
     return redirect('/dashboard')
 
-@app.route('/create_event', methods=['POST'])
-def create_event():
-    event = Event(
-        title=request.form['title'],
-        description=request.form['description'],
-        date=request.form['date'],
-        created_by=session['user_id']
-    )
-    db.session.add(event)
-    db.session.commit()
-    return redirect('/dashboard')
+if __name__ == '__main__':
+    app.run(debug=True)
