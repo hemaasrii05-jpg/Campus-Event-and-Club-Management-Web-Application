@@ -1,10 +1,71 @@
-<form method="POST">
-    <h2>Login</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Campus Events - Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 40px; color: #333; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .event-card { border-left: 5px solid #007bff; background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .join-btn { display: inline-block; background-color: #28a745; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .join-btn:hover { background-color: #218838; }
+        .search-bar { width: 70%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .search-btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .nav-links { margin-bottom: 20px; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
 
-    <input type="email" name="email" placeholder="Email" required><br><br>
-    <input type="password" name="password" placeholder="Password" required><br><br>
+<div class="container">
+    <div class="nav-links">
+        <span>Logged in as: <strong>{{ session['username'] }}</strong></span>
+        <div>
+            <a href="/create_club" style="margin-right: 15px; color: #e65100; font-weight: bold;">+ Register a Club</a>
+            <a href="/create_event" style="margin-right: 15px;">+ Create Event</a>
+            <a href="/logout" style="color: red;">Logout</a>
+        </div>
+    </div>
 
-    <button type="submit">Login</button>
+    <h1>Student Dashboard</h1>
 
-    <p>No account? <a href="/register">Register</a></p>
-</form>
+    <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffe0b2;">
+        <h3 style="margin-top: 0; color: #e65100;">My Registered Clubs</h3>
+        {% if clubs %}
+            <ul style="list-style: none; padding: 0;">
+            {% for club in clubs %}
+                <li style="padding: 5px 0;">🌟 <strong>{{ club.name }}</strong></li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>You haven't registered any clubs yet. <a href="/create_club">Start one now!</a></p>
+        {% endif %}
+    </div>
+    <div style="margin-bottom: 30px;">
+        <form action="/dashboard" method="GET">
+            <input type="text" name="search" class="search-bar" placeholder="Find a club or event...">
+            <button type="submit" class="search-btn">Search</button>
+            {% if request.args.get('search') %}
+                <a href="/dashboard">Clear Search</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <hr>
+
+    <h2>Available Events</h2>
+    {% if events %}
+        {% for event in events %}
+        <div class="event-card">
+            <h3>{{ event.title }}</h3>
+            <p>{{ event.description }}</p>
+            <p><small> Date: {{ event.date }}</small></p>
+            
+            <a href="/join_event/{{ event.id }}" class="join-btn">Join Event</a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No events found. Try searching for something else!</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

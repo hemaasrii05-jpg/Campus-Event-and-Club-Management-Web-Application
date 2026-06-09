@@ -1,14 +1,14 @@
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
-        new_user = User(username=username, email=email, password=password)
-        db.session.add(new_user)
-        db.session.commit()
+db = SQLAlchemy()
 
-        return redirect('/login')
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
 
-    return render_template('register.html')
+    username = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+
+    role = db.Column(db.String(20), default='student')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
