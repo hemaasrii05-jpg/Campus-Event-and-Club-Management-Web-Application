@@ -33,11 +33,24 @@ def home():
 def register():
     """Handles new user sign-ups."""
     if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        # Validate form fields
+        if not username or not email or not password:
+            return render_template('register.html', error='All fields are required')
+        
+        # Check if user already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return render_template('register.html', error='Email already registered')
+        
         # Create a new User object from the form data
         user = User(
-            username=request.form['username'],
-            email=request.form['email'],
-            password=request.form['password']  # In production, this should be hashed!
+            username=username,
+            email=email,
+            password=password  # In production, this should be hashed!
         )
         # Save to the database
         db.session.add(user)
@@ -53,14 +66,16 @@ def login():
     if request.method == 'POST':
         # Check if a user exists with matching email and password
         user = User.query.filter_by(
-            email=request.form['email'],
-            password=request.form['password']
+            email=request.form.get('email', ''),
+            password=request.form.get('password', '')
         ).first()
 
         if user:
             # Store user ID in session to keep them logged in
             session['user_id'] = user.id
             return redirect('/dashboard')
+        else:
+            return render_template('login.html', error='Invalid email or password')
 
     return render_template('login.html')
 
@@ -85,11 +100,18 @@ def create_event():
     """Handles event creation (linked to Event/Club features)."""
     if 'user_id' not in session:
         return redirect('/login')
+    
+    title = request.form.get('title', '').strip()
+    description = request.form.get('description', '').strip()
+    date = request.form.get('date', '').strip()
+    
+    if not title or not description or not date:
+        return redirect('/dashboard')  # Return to dashboard if missing fields
         
     event = Event(
-        title=request.form['title'],
-        description=request.form['description'],
-        date=request.form['date'],
+        title=title,
+        description=description,
+        date=date,
         created_by=session['user_id']
     )
     db.session.add(event)
