@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Events</h1>
+<a href="/events/create">Create event</a>
+<div id="events-list">
+  {% for event in events %}
+  <div class="event-item" data-id="{{ event.id }}">
+    <h3><a href="/events/{{ event.id }}">{{ event.title }}</a></h3>
+    <p>{{ event.description }}</p>
+    <p><strong>When:</strong> {{ event.start_datetime }}{% if event.end_datetime %} - {{ event.end_datetime }}{% endif %}</p>
+    <p><strong>Where:</strong> {{ event.location }}</p>
+    <button class="rsvp-button">RSVP</button>
+  </div>
+  {% else %}
+  <p>No events yet.</p>
+  {% endfor %}
+</div>
+
+<script src="/static/js/events.js"></script>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ event.title }}</h1>
+<p>{{ event.description }}</p>
+<p><strong>When:</strong> {{ event.start_datetime }}{% if event.end_datetime %} - {{ event.end_datetime }}{% endif %}</p>
+<p><strong>Where:</strong> {{ event.location }}</p>
+<button id="rsvp-button" data-id="{{ event.id }}">RSVP</button>
+<script>
+document.getElementById('rsvp-button').addEventListener('click', async function(){
+  const id = this.dataset.id
+  const res = await fetch(`/events/${id}/rsvp`, {method: 'POST'});
+  const data = await res.json();
+  alert(JSON.stringify(data));
+});
+</script>
+{% endblock %}
