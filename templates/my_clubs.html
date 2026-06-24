@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Joined Clubs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    {% if message == "exited" %}
+    <script>
+        alert("Successfully exited the club!");
+    </script>
+    {% endif %}
+
+    <div class="page">
+
+        <div class="top-bar">
+            <h1>My Joined Clubs</h1>
+
+            <div>
+                <a href="/student-clubs">Student Clubs</a>
+                <a href="/my-clubs">My Clubs</a>
+            </div>
+        </div>
+
+        <p class="subtitle">These are the clubs you have joined.</p>
+
+        <div class="club-grid">
+
+            {% if clubs %}
+
+                {% for club in clubs %}
+
+                <div class="club-card">
+
+                    <span class="badge">{{ club.category }}</span>
+
+                    <h2>{{ club.club_name }}</h2>
+
+                    <p class="description">
+                        {{ club.club_description }}
+                    </p>
+
+                    <div class="members">
+                        👤 Joined by: {{ club.student_name }}
+                    </div>
+
+                    <div class="members">
+                        👥 {{ club.members }} Members
+                    </div>
+
+                    <a href="/exit/{{ club.id }}" class="exit-btn">Exit Club</a>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="empty-box">
+                    <h2>No clubs joined yet</h2>
+                    <p>You have not joined any club yet.</p>
+                    <a href="/student-clubs" class="join-btn">Browse Clubs</a>
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</body>
+</html>

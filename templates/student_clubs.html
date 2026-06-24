@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Clubs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    {% if message == "joined" %}
+    <script>
+        alert("Successfully joined the club!");
+    </script>
+    {% elif message == "already_joined" %}
+    <script>
+        alert("You already joined this club.");
+    </script>
+    {% endif %}
+
+    <div class="page">
+
+        <div class="top-bar">
+            <h1>Student Clubs</h1>
+
+            <div>
+                <a href="/student-clubs">Student Clubs</a>
+                <a href="/my-clubs">My Clubs</a>
+            </div>
+        </div>
+
+        <p class="subtitle">Browse and join clubs based on your interests.</p>
+
+        <div class="club-grid">
+
+            {% for club in clubs %}
+
+            <div class="club-card">
+
+                <span class="badge">{{ club.category }}</span>
+
+                <h2>{{ club.club_name }}</h2>
+
+                <p class="description">
+                    {{ club.club_description }}
+                </p>
+
+                <div class="members">
+                    👥 {{ club.members }} Members
+                </div>
+
+                {% if club.joined == 1 %}
+                    <button class="joined-btn" disabled>Joined</button>
+                {% else %}
+                    <form action="/join/{{ club.id }}" method="POST" onsubmit="return askName(this);">
+                        <input type="hidden" name="student_name">
+                        <button type="submit" class="join-btn">Join</button>
+                    </form>
+                {% endif %}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <script>
+        function askName(form) {
+            let studentName = prompt("Enter your name to join this club:");
+
+            if (studentName === null || studentName.trim() === "") {
+                alert("Please enter your name to join.");
+                return false;
+            }
+
+            form.student_name.value = studentName.trim();
+            return true;
+        }
+    </script>
+
+</body>
+</html>
