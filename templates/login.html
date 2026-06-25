@@ -1,10 +1,27 @@
-<form method="POST">
-    <h2>Login</h2>
+{% extends 'base.html' %}
 
-    <input type="email" name="email" placeholder="Email" required><br><br>
-    <input type="password" name="password" placeholder="Password" required><br><br>
-
-    <button type="submit">Login</button>
-
-    <p>No account? <a href="/register">Register</a></p>
-</form>
+{% block content %}
+<div class="auth-container" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+    <div class="card" style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center;">
+        
+        <h2 style="margin-bottom: 1.5rem; font-family: sans-serif; color: #333;">🔒 Sign In</h2>
+        
+        <form method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
+            <input type="email" name="email" placeholder="Email Address" required 
+                   style="padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+            
+            <input type="password" name="password" placeholder="Password" required 
+                   style="padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+            
+            <button type="submit" 
+                    style="background: #007bff; color: white; border: none; padding: 0.8rem; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 0.5rem;">
+                Sign In
+            </button>
+        </form>
+        
+        <p style="margin-top: 1.5rem; font-size: 0.9rem; color: #666;">
+            No account? <a href="/register" style="color: #007bff; text-decoration: none; font-weight: bold;">Register</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
