@@ -1,19 +1,27 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Create Event</h1>
-<form method="post" action="/events/create">
-  <label>Title</label>
-  <input name="title" required>
-  <label>Description</label>
-  <textarea name="description"></textarea>
-  <label>Start (ISO)</label>
-  <input name="start_datetime" placeholder="2026-06-05T15:00:00">
-  <label>End (ISO)</label>
-  <input name="end_datetime">
-  <label>Location</label>
-  <input name="location">
-  <label>Capacity</label>
-  <input name="capacity" type="number">
-  <button type="submit">Create</button>
-</form>
+<div class="container">
+  <h1>Create Event</h1>
+  <form method="post" action="/events/create" class="auth-form">
+    <label>Title</label>
+    <input name="title" required value="{{ form.title|default('') }}">
+
+    <label>Description</label>
+    <textarea name="description">{{ form.description|default('') }}</textarea>
+
+    <label>Start</label>
+    <input type="datetime-local" name="start_datetime" value="{{ form.start_datetime|default('') }}">
+
+    <label>End</label>
+    <input type="datetime-local" name="end_datetime" value="{{ form.end_datetime|default('') }}">
+
+    <label>Location</label>
+    <input name="location" value="{{ form.location|default('') }}">
+
+    <label>Capacity</label>
+    <input name="capacity" type="number" value="{{ form.capacity|default('') }}">
+
+    <button type="submit">Create Event</button>
+  </form>
+</div>
 {% endblock %}

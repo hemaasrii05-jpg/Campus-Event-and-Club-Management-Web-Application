@@ -8,8 +8,27 @@
   </head>
   <body>
     <nav>
-      <a href="/">Home</a> | <a href="/events">Events</a>
+      <div class="nav-brand"><a href="/">Campus Event Manager</a></div>
+      <div class="nav-links">
+        <a href="/events">Events</a>
+        {% if session.get('user_id') %}
+          <a href="/dashboard">Dashboard</a>
+          <a href="/logout">Logout</a>
+        {% else %}
+          <a href="/login">Login</a>
+          <a href="/register">Register</a>
+        {% endif %}
+      </div>
     </nav>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <div class="flash">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
     <main>
       {% block content %}{% endblock %}
     </main>

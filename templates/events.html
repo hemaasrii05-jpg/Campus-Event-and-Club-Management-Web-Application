@@ -7,7 +7,7 @@
   <div class="event-item" data-id="{{ event.id }}">
     <h3><a href="/events/{{ event.id }}">{{ event.title }}</a></h3>
     <p>{{ event.description }}</p>
-    <p><strong>When:</strong> {{ event.start_datetime }}{% if event.end_datetime %} - {{ event.end_datetime }}{% endif %}</p>
+    <p><strong>When:</strong> {{ event.start_datetime|format_datetime }}{% if event.end_datetime %} - {{ event.end_datetime|format_datetime }}{% endif %}</p>
     <p><strong>Where:</strong> {{ event.location }}</p>
     <button class="rsvp-button">RSVP</button>
   </div>

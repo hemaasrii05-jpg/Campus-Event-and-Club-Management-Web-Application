@@ -1,8 +1,80 @@
-from flask import Blueprint, render_template, request, redirect, session, url_for, jsonify
-from models import db, Event, User, Registration
+from functools import wraps
+
+from flask import Blueprint, render_template, request, redirect, session, url_for, jsonify, flash
+from models import db, Event, Registration
 from datetime import datetime
 
 events_bp = Blueprint('events', __name__)
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to continue.')
+            return redirect(url_for('auth.login'))
+        return view(*args, **kwargs)
+    return wrapped_view
+
+
+def parse_event_data(form):
+    title = form.get('title', '').strip()
+    description = form.get('description', '').strip()
+    start = form.get('start_datetime', '').strip()
+    end = form.get('end_datetime', '').strip()
+    location = form.get('location', '').strip()
+    capacity = form.get('capacity', '').strip()
+
+    errors = []
+    if not title:
+        errors.append('Event title is required.')
+    if not start:
+        errors.append('Start date/time is required.')
+
+    start_dt = None
+    end_dt = None
+
+    if start:
+        try:
+            start_dt = datetime.fromisoformat(start)
+        except Exception:
+            errors.append('Start date/time is invalid. Use the picker or ISO datetime format.')
+
+    if end:
+        try:
+            end_dt = datetime.fromisoformat(end)
+        except Exception:
+            errors.append('End date/time is invalid. Use the picker or ISO datetime format.')
+
+    if start_dt and end_dt and end_dt <= start_dt:
+        errors.append('End time must be after start time.')
+
+    capacity_value = None
+    if capacity:
+        try:
+            capacity_value = int(capacity)
+            if capacity_value < 0:
+                errors.append('Capacity cannot be negative.')
+        except ValueError:
+            errors.append('Capacity must be a number.')
+
+    return {
+        'title': title,
+        'description': description,
+        'start_datetime': start_dt,
+        'end_datetime': end_dt,
+        'location': location,
+        'capacity': capacity_value,
+        'errors': errors,
+        'raw': {
+            'title': title,
+            'description': description,
+            'start_datetime': start,
+            'end_datetime': end,
+            'location': location,
+            'capacity': capacity
+        }
+    }
 
 
 @events_bp.route('/events')
@@ -18,43 +90,72 @@ def event_detail(event_id):
 
 
 @events_bp.route('/events/create', methods=['GET', 'POST'])
+@login_required
 def create_event():
     if request.method == 'POST':
-        title = request.form.get('title')
-        description = request.form.get('description')
-        start = request.form.get('start_datetime')
-        end = request.form.get('end_datetime')
-        location = request.form.get('location')
-        capacity = request.form.get('capacity')
-
-        try:
-            start_dt = datetime.fromisoformat(start)
-        except Exception:
-            start_dt = datetime.utcnow()
-
-        end_dt = None
-        if end:
-            try:
-                end_dt = datetime.fromisoformat(end)
-            except Exception:
-                end_dt = None
-
-        host_id = session.get('user_id') or 1
+        payload = parse_event_data(request.form)
+        if payload['errors']:
+            for error in payload['errors']:
+                flash(error)
+            return render_template('create_event.html', form=payload['raw'])
 
         event = Event(
-            title=title,
-            description=description,
-            start_datetime=start_dt,
-            end_datetime=end_dt,
-            location=location,
-            capacity=int(capacity) if capacity else None,
-            host_id=host_id
+            title=payload['title'],
+            description=payload['description'],
+            start_datetime=payload['start_datetime'],
+            end_datetime=payload['end_datetime'],
+            location=payload['location'],
+            capacity=payload['capacity'],
+            host_id=session['user_id']
         )
         db.session.add(event)
         db.session.commit()
-        return redirect(url_for('events.events_list'))
+        flash('Event created successfully.')
+        return redirect(url_for('events.event_detail', event_id=event.id))
 
-    return render_template('create_event.html')
+    return render_template('create_event.html', form={})
+
+
+@events_bp.route('/events/<int:event_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    if event.host_id != session['user_id']:
+        flash('Only the event host can edit this event.')
+        return redirect(url_for('events.event_detail', event_id=event.id))
+
+    if request.method == 'POST':
+        payload = parse_event_data(request.form)
+        if payload['errors']:
+            for error in payload['errors']:
+                flash(error)
+            return render_template('edit_event.html', event=event, form=payload['raw'])
+
+        event.title = payload['title']
+        event.description = payload['description']
+        event.start_datetime = payload['start_datetime']
+        event.end_datetime = payload['end_datetime']
+        event.location = payload['location']
+        event.capacity = payload['capacity']
+        db.session.commit()
+        flash('Event updated successfully.')
+        return redirect(url_for('events.event_detail', event_id=event.id))
+
+    return render_template('edit_event.html', event=event, form={})
+
+
+@events_bp.route('/events/<int:event_id>/delete', methods=['POST'])
+@login_required
+def delete_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    if event.host_id != session['user_id']:
+        flash('Only the event host can delete this event.')
+        return redirect(url_for('events.event_detail', event_id=event.id))
+
+    db.session.delete(event)
+    db.session.commit()
+    flash('Event deleted successfully.')
+    return redirect(url_for('events.events_list'))
 
 
 @events_bp.route('/events/<int:event_id>/rsvp', methods=['POST'])
@@ -68,6 +169,11 @@ def rsvp(event_id):
     existing = Registration.query.filter_by(user_id=user_id, event_id=event.id).first()
     if existing:
         return jsonify({'status': 'already_registered'})
+
+    if event.capacity is not None:
+        current_count = Registration.query.filter_by(event_id=event.id).count()
+        if current_count >= event.capacity:
+            return jsonify({'error': 'This event is full.'}), 400
 
     reg = Registration(user_id=user_id, event_id=event.id)
     db.session.add(reg)

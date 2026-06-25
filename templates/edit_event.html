@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h1>Edit Event</h1>
+  <form method="post" action="/events/{{ event.id }}/edit" class="auth-form">
+    <label>Title</label>
+    <input name="title" required value="{{ form.title|default(event.title) }}">
+
+    <label>Description</label>
+    <textarea name="description">{{ form.description|default(event.description) }}</textarea>
+
+    <label>Start</label>
+    <input type="datetime-local" name="start_datetime" value="{{ form.start_datetime|default(event.start_datetime|datetime_local) }}">
+
+    <label>End</label>
+    <input type="datetime-local" name="end_datetime" value="{{ form.end_datetime|default(event.end_datetime|datetime_local) }}">
+
+    <label>Location</label>
+    <input name="location" value="{{ form.location|default(event.location) }}">
+
+    <label>Capacity</label>
+    <input name="capacity" type="number" value="{{ form.capacity|default(event.capacity) }}">
+
+    <button type="submit">Save Changes</button>
+  </form>
+</div>
+{% endblock %}

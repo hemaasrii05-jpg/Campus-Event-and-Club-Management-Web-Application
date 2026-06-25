@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, session
-from models import db, User
+from flask import Blueprint, render_template, request, redirect, session, flash, url_for
+from models import db, User, Event
+from werkzeug.security import generate_password_hash, check_password_hash
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -7,14 +8,16 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.query.filter_by(
-            email=request.form['email'],
-            password=request.form['password']
-        ).first()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
 
-        if user:
+        user = User.query.filter_by(email=email).first()
+        if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
-            return redirect('/dashboard')
+            session['username'] = user.username
+            return redirect(url_for('auth.dashboard'))
+
+        flash('Invalid email or password. Please try again.')
 
     return render_template('login.html')
 
@@ -22,22 +25,49 @@ def login():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+
+        if not username or not email or not password:
+            flash('Please fill in all required fields.')
+            return render_template('register.html')
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-            return "Email already registered"
+            flash('Email already registered. Please use a different email.')
+            return render_template('register.html')
 
-        new_user = User(username=username, email=email, password=password)
+        new_user = User(
+            username=username,
+            email=email,
+            password=generate_password_hash(password)
+        )
         db.session.add(new_user)
         db.session.commit()
 
         session['user_id'] = new_user.id
-        return redirect('/dashboard')
+        session['username'] = new_user.username
+        return redirect(url_for('auth.dashboard'))
 
     return render_template('register.html')
+
+
+@auth_bp.route('/dashboard')
+def dashboard():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('auth.login'))
+
+    user = User.query.get(user_id)
+    if not user:
+        session.clear()
+        return redirect(url_for('auth.login'))
+
+    events = Event.query.order_by(Event.start_datetime.asc()).all()
+    clubs = []
+
+    return render_template('dashboard.html', events=events, clubs=clubs)
 
 
 @auth_bp.route('/logout')
