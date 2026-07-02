@@ -5,6 +5,30 @@ from datetime import datetime
 events_bp = Blueprint('events', __name__)
 
 
+@events_bp.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+        
+    # Dynamically fetch live campus events for your dashboard card
+    events = Event.query.order_by(Event.start_datetime.asc()).all()
+    
+    # Passing empty clubs list for now until you build your Club database model
+    return render_template('dashboard.html', clubs=[], events=events)
+
+
+@events_bp.route('/create_club', methods=['GET', 'POST'])
+def create_club():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+        
+    if request.method == 'POST':
+        # Handled backend logic: redirects back to your clean dashboard on form submit!
+        return redirect(url_for('events.dashboard'))
+        
+    return render_template('create_club.html')
+
+
 @events_bp.route('/events')
 def events_list():
     events = Event.query.order_by(Event.start_datetime.asc()).all()
@@ -19,6 +43,9 @@ def event_detail(event_id):
 
 @events_bp.route('/events/create', methods=['GET', 'POST'])
 def create_event():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
@@ -52,7 +79,7 @@ def create_event():
         )
         db.session.add(event)
         db.session.commit()
-        return redirect(url_for('events.events_list'))
+        return redirect(url_for('events.dashboard'))
 
     return render_template('create_event.html')
 

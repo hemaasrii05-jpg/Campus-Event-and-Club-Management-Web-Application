@@ -1,8 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, session
+from flask import Blueprint, render_template, request, redirect, session, url_for
 from models import db, User
 
 auth_bp = Blueprint('auth', __name__)
-
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -14,10 +13,11 @@ def login():
 
         if user:
             session['user_id'] = user.id
-            return redirect('/dashboard')
+            session['username'] = user.username
+            # Change this to look up the 'events' blueprint dashboard function
+            return redirect(url_for('events.dashboard'))
 
     return render_template('login.html')
-
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -35,12 +35,13 @@ def register():
         db.session.commit()
 
         session['user_id'] = new_user.id
-        return redirect('/dashboard')
+        session['username'] = new_user.username
+        # Change this to look up the 'events' blueprint dashboard function
+        return redirect(url_for('events.dashboard'))
 
     return render_template('register.html')
-
 
 @auth_bp.route('/logout')
 def logout():
     session.clear()
-    return redirect('/')
+    return redirect(url_for('home'))

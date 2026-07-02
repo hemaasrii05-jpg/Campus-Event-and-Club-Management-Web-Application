@@ -10,6 +10,7 @@ app.config['SECRET_KEY'] = 'supersecretkey123'
 # Link the database instance (from models.py) to this Flask app
 db.init_app(app)
 
+# Register both blueprint components with Flask
 app.register_blueprint(events_bp)
 app.register_blueprint(auth_bp)
 
