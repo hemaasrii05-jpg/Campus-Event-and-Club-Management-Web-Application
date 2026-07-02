@@ -1,11 +1,17 @@
+import os
 from datetime import datetime
 from flask import Flask, render_template
 from models import db, User, Club, Event
 from routes.events import events_bp
 from routes.auth import auth_bp
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+INSTANCE_DIR = os.path.join(BASE_DIR, 'instance')
+os.makedirs(INSTANCE_DIR, exist_ok=True)
+DB_PATH = os.path.join(INSTANCE_DIR, 'database.db')
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SECRET_KEY'] = 'supersecretkey123'
 
 # Link the database instance (from models.py) to this Flask app
