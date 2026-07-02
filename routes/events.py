@@ -1,7 +1,7 @@
 from functools import wraps
 
 from flask import Blueprint, render_template, request, redirect, session, url_for, jsonify, flash
-from models import db, Event, Registration
+from models import db, Event, Registration, User
 from datetime import datetime
 
 events_bp = Blueprint('events', __name__)
@@ -80,7 +80,12 @@ def parse_event_data(form):
 @events_bp.route('/events')
 def events_list():
     events = Event.query.order_by(Event.start_datetime.asc()).all()
-    return render_template('events.html', events=events)
+    user_events = []
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user:
+            user_events = [registration.event for registration in user.registrations]
+    return render_template('events.html', events=events, user_events=user_events)
 
 
 @events_bp.route('/events/<int:event_id>')
@@ -179,6 +184,20 @@ def rsvp(event_id):
     db.session.add(reg)
     db.session.commit()
     return jsonify({'status': 'registered'})
+
+
+@events_bp.route('/events/<int:event_id>/cancel', methods=['POST'])
+def cancel_registration(event_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'authentication required'}), 401
+
+    registration = Registration.query.filter_by(user_id=session['user_id'], event_id=event_id).first()
+    if not registration:
+        return jsonify({'error': 'not_registered'}), 404
+
+    db.session.delete(registration)
+    db.session.commit()
+    return jsonify({'status': 'cancelled'})
 
 
 @events_bp.route('/api/events')

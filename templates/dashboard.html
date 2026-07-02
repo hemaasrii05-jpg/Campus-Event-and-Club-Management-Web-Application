@@ -17,7 +17,15 @@
     {% if clubs %}
       <ul class="club-list">
       {% for club in clubs %}
-        <li>🌟 <strong>{{ club.name }}</strong></li>
+        <li>
+          <strong>{{ club.name }}</strong>
+          <div class="action-links" style="margin-top: 8px;">
+            <a href="{{ url_for('auth.club_detail', club_id=club.id) }}" class="btn btn-primary">View Details</a>
+            <form method="POST" action="{{ url_for('auth.leave_club', club_id=club.id) }}" style="display: inline;">
+              <button type="submit" class="btn btn-danger">Leave</button>
+            </form>
+          </div>
+        </li>
       {% endfor %}
       </ul>
     {% else %}

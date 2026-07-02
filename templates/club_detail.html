@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h1>{{ club.name }}</h1>
+  <p>{{ club.description or 'No description provided.' }}</p>
+  <p><strong>Your role:</strong> {{ membership.role }}</p>
+
+  <form method="POST" action="{{ url_for('auth.leave_club', club_id=club.id) }}" style="margin-top: 20px;">
+    <button type="submit" class="btn btn-danger">Leave Club</button>
+  </form>
+
+  <p class="auth-help"><a href="{{ url_for('auth.dashboard') }}">Back to Dashboard</a></p>
+</div>
+{% endblock %}

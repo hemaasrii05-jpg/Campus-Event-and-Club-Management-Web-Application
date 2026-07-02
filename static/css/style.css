@@ -94,6 +94,48 @@ input[type='submit']:hover {
   background: #1d2939;
 }
 
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  padding-right: 72px;
+}
+
+.auth-form button.toggle-password {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #000000 !important;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0;
+  line-height: 1;
+  box-shadow: none;
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-block;
+  width: auto;
+  height: auto;
+  text-decoration: none;
+}
+
+.auth-form button.toggle-password:hover,
+.auth-form button.toggle-password:focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  outline: none;
+  box-shadow: none;
+  color: #000000 !important;
+}
+
 .auth-help,
 .form-help,
 .page-help {
