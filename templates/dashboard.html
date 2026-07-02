@@ -33,6 +33,23 @@
     {% endif %}
   </section>
 
+  <section class="card" id="my-registered-events">
+    <h3>My Registered Events</h3>
+    {% if user_events %}
+      {% for event in user_events %}
+        <div class="event-card">
+          <h4>{{ event.title }}</h4>
+          <p>{{ event.description }}</p>
+          <p><strong>Date:</strong> {{ event.start_datetime }}{% if event.end_datetime %} - {{ event.end_datetime }}{% endif %}</p>
+          <p><strong>Location:</strong> {{ event.location }}</p>
+          <button class="cancel-button" data-id="{{ event.id }}">Unregister</button>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>You haven't registered for any events yet.</p>
+    {% endif %}
+  </section>
+
   <section class="search-panel">
     <form action="/dashboard" method="GET" class="search-form">
       <input type="text" name="search" class="search-bar" placeholder="Find a club or event...">

@@ -88,6 +88,72 @@ def events_list():
     return render_template('events.html', events=events, user_events=user_events)
 
 
+@events_bp.route('/my-events')
+@login_required
+def my_events():
+    user = User.query.get(session.get('user_id'))
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 8, type=int)
+
+    if not user:
+        return redirect(url_for('auth.login'))
+
+    # Query registrations and paginate
+    regs_q = Registration.query.filter_by(user_id=user.id).order_by(Registration.created_at.desc())
+    total = regs_q.count()
+    regs = regs_q.offset((page - 1) * per_page).limit(per_page).all()
+    user_events = [r.event for r in regs]
+
+    pagination = {
+        'page': page,
+        'per_page': per_page,
+        'total': total,
+        'pages': (total + per_page - 1) // per_page
+    }
+
+    return render_template('my_events.html', user_events=user_events, pagination=pagination)
+
+
+
+@events_bp.route('/api/my-registrations')
+def api_my_registrations():
+    if 'user_id' not in session:
+        return jsonify({'error': 'authentication required'}), 401
+
+    user_id = session['user_id']
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+
+    regs_q = Registration.query.filter_by(user_id=user_id).order_by(Registration.created_at.desc())
+    total = regs_q.count()
+    regs = regs_q.offset((page - 1) * per_page).limit(per_page).all()
+
+    out = []
+    for r in regs:
+        e = r.event
+        out.append({
+            'registration_id': r.id,
+            'status': r.status,
+            'registered_at': r.created_at.isoformat() if r.created_at else None,
+            'event': {
+                'id': e.id,
+                'title': e.title,
+                'description': e.description,
+                'start': e.start_datetime.isoformat() if e.start_datetime else None,
+                'end': e.end_datetime.isoformat() if e.end_datetime else None,
+                'location': e.location,
+            }
+        })
+
+    return jsonify({
+        'page': page,
+        'per_page': per_page,
+        'total': total,
+        'pages': (total + per_page - 1) // per_page,
+        'registrations': out
+    })
+
+
 @events_bp.route('/events/<int:event_id>')
 def event_detail(event_id):
     event = Event.query.get_or_404(event_id)

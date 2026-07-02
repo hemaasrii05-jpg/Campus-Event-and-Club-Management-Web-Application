@@ -12,6 +12,8 @@
       <div class="nav-links">
         <a href="/events">Events</a>
         {% if session.get('user_id') %}
+          <a href="/my-events">My Events</a>
+          <a href="/events#registered-events">Registered Events</a>
           <a href="/dashboard">Dashboard</a>
           <a href="/logout">Logout</a>
         {% else %}
@@ -32,6 +34,22 @@
     <main>
       {% block content %}{% endblock %}
     </main>
+    <!-- Modal confirmation -->
+    <div id="confirm-modal" class="modal" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-panel">
+        <div class="modal-body">
+          <p id="confirm-modal-message"></p>
+        </div>
+        <div class="modal-actions">
+          <button id="confirm-cancel" class="btn btn-secondary">Cancel</button>
+          <button id="confirm-ok" class="btn btn-primary">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
     <script src="/static/js/script.js?v=2"></script>
   </body>
 </html>

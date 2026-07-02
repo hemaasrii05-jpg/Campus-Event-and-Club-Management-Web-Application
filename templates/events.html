@@ -4,7 +4,7 @@
 <a href="/events/create">Create event</a>
 
 {% if session.get('user_id') %}
-<section class="card">
+<section class="card" id="registered-events">
   <h2>Your Registered Events</h2>
   {% if user_events %}
     {% for event in user_events %}

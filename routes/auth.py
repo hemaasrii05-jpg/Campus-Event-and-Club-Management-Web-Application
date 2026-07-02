@@ -2,8 +2,19 @@ from flask import Blueprint, render_template, request, redirect, session, flash,
 from sqlalchemy import func
 from models import db, User, Event, Club, ClubMember
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
 auth_bp = Blueprint('auth', __name__)
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to continue.')
+            return redirect(url_for('auth.login'))
+        return view(*args, **kwargs)
+    return wrapped_view
 
 
 def normalize_email(email):
@@ -72,6 +83,7 @@ def register():
 
 
 @auth_bp.route('/dashboard')
+@login_required
 def dashboard():
     user_id = session.get('user_id')
     if not user_id:
@@ -84,15 +96,15 @@ def dashboard():
 
     events = Event.query.order_by(Event.start_datetime.asc()).all()
     clubs = [membership.club for membership in user.club_memberships]
+    user_events = [registration.event for registration in user.registrations]
 
-    return render_template('dashboard.html', events=events, clubs=clubs)
+    return render_template('dashboard.html', events=events, clubs=clubs, user_events=user_events)
 
 
 @auth_bp.route('/create_club', methods=['GET', 'POST'])
+@login_required
 def create_club():
     user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('auth.login'))
 
     if request.method == 'POST':
         club_name = request.form.get('club_name', '').strip()
@@ -117,10 +129,9 @@ def create_club():
 
 
 @auth_bp.route('/clubs/<int:club_id>')
+@login_required
 def club_detail(club_id):
     user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('auth.login'))
 
     membership = ClubMember.query.filter_by(user_id=user_id, club_id=club_id).first()
     if not membership:
@@ -132,10 +143,9 @@ def club_detail(club_id):
 
 
 @auth_bp.route('/clubs/<int:club_id>/leave', methods=['POST'])
+@login_required
 def leave_club(club_id):
     user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('auth.login'))
 
     membership = ClubMember.query.filter_by(user_id=user_id, club_id=club_id).first()
     if not membership:

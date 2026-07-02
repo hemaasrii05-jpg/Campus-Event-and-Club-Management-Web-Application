@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>My Events</h1>
+
+<section class="card" id="my-events-list">
+  {% if user_events %}
+    {% for event in user_events %}
+      <div class="event-card">
+        <h3>{{ event.title }}</h3>
+        <p>{{ event.description }}</p>
+        <p><strong>When:</strong> {{ event.start_datetime|format_datetime }}{% if event.end_datetime %} - {{ event.end_datetime|format_datetime }}{% endif %}</p>
+        <p><strong>Where:</strong> {{ event.location }}</p>
+        <button class="cancel-button" data-id="{{ event.id }}">Unregister</button>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>You have not registered for any events yet.</p>
+  {% endif %}
+</section>
+
+<script src="/static/js/events.js"></script>
+{% endblock %}
+
+{% if pagination %}
+  <nav class="pagination" aria-label="My events pagination">
+    {% if pagination.page > 1 %}
+      <a class="btn btn-secondary" href="?page={{ pagination.page - 1 }}&per_page={{ pagination.per_page }}">Previous</a>
+    {% endif %}
+    <span> Page {{ pagination.page }} of {{ pagination.pages }} </span>
+    {% if pagination.page < pagination.pages %}
+      <a class="btn btn-secondary" href="?page={{ pagination.page + 1 }}&per_page={{ pagination.per_page }}">Next</a>
+    {% endif %}
+  </nav>
+{% endif %}
