@@ -8,6 +8,15 @@
         <h2>Create New Campus Club</h2>
         <p style="color: #666; font-size: 0.9rem; margin-top: -10px; margin-bottom: 20px;">Add an official student organization directly to the directory.</p>
         
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 12px; margin-bottom: 15px; border-radius: 5px; text-align: center; font-size: 0.9rem;">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
         <form method="POST">
             <input type="text" name="club_name" placeholder="Club Name (e.g. Robotics Club)" style="width:100%; margin: 10px 0; padding: 10px; box-sizing: border-box;" required>
             <textarea name="club_desc" placeholder="What does your club do? (One-line summary)" style="width:100%; margin: 10px 0; padding: 10px; box-sizing: border-box;" rows="4" required></textarea>

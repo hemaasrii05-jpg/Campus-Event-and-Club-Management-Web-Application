@@ -43,3 +43,11 @@ class Registration(db.Model):
 
     user = db.relationship('User', back_populates='registrations')
     event = db.relationship('Event', back_populates='registrations')
+
+
+class Club(db.Model):
+    __tablename__ = 'clubs'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), unique=True, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

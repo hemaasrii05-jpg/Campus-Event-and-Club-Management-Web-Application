@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, session, url_for, jsonify
-from models import db, Event, User, Registration
+from flask import Blueprint, render_template, request, redirect, session, url_for, jsonify, flash
+from models import db, Event, User, Registration, Club
 from datetime import datetime
+from sqlalchemy.exc import IntegrityError
 
 events_bp = Blueprint('events', __name__)
 
@@ -10,11 +11,11 @@ def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
         
-    # Dynamically fetch live campus events for your dashboard card
+    # Dynamically fetch real active clubs and campus events from your SQLite tables
+    clubs = Club.query.order_by(Club.created_at.desc()).all()
     events = Event.query.order_by(Event.start_datetime.asc()).all()
     
-    # Passing empty clubs list for now until you build your Club database model
-    return render_template('dashboard.html', clubs=[], events=events)
+    return render_template('dashboard.html', clubs=clubs, events=events)
 
 
 @events_bp.route('/create_club', methods=['GET', 'POST'])
@@ -23,8 +24,28 @@ def create_club():
         return redirect(url_for('auth.login'))
         
     if request.method == 'POST':
-        # Handled backend logic: redirects back to your clean dashboard on form submit!
-        return redirect(url_for('events.dashboard'))
+        # Capture form inputs matching HTML 'name' elements exactly
+        title = request.form.get('club_name')
+        desc = request.form.get('club_desc')
+        
+        if not title or not desc:
+            flash("Both club name and description are required!", "danger")
+            return render_template('create_club.html')
+            
+        try:
+            # Create object instance and commit to your central SQLite db file
+            new_club = Club(name=title, description=desc)
+            db.session.add(new_club)
+            db.session.commit()
+            
+            flash("Club created successfully!", "success")
+            # Redirect right back to dashboard layout structure
+            return redirect(url_for('events.dashboard'))
+            
+        except IntegrityError:
+            db.session.rollback()  # Undo the failed transaction safely
+            flash("A club with this name already exists! Please choose a unique name.", "danger")
+            return render_template('create_club.html')
         
     return render_template('create_club.html')
 

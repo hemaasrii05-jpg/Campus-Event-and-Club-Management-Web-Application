@@ -1,19 +1,48 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Create Event</h1>
-<form method="post" action="/events/create">
-  <label>Title</label>
-  <input name="title" required>
-  <label>Description</label>
-  <textarea name="description"></textarea>
-  <label>Start (ISO)</label>
-  <input name="start_datetime" placeholder="2026-06-05T15:00:00">
-  <label>End (ISO)</label>
-  <input name="end_datetime">
-  <label>Location</label>
-  <input name="location">
-  <label>Capacity</label>
-  <input name="capacity" type="number">
-  <button type="submit">Create</button>
-</form>
+<body style="font-family: sans-serif; padding: 50px; background-color: #f4f7f6; margin: 0;">
+    <div style="background: white; padding: 30px; border-radius: 10px; max-width: 450px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h2 style="margin-top: 0;">Create New Event</h2>
+        <p style="color: #666; font-size: 0.9rem; margin-top: -10px; margin-bottom: 20px;">Schedule an event for students to discover and register.</p>
+        
+        <form method="post" action="/events/create">
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">Event Title</label>
+                <input type="text" name="title" placeholder="e.g. Intro to Python Workshop" style="width:100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" required>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">Description</label>
+                <textarea name="description" placeholder="Provide event details, schedule, or prerequisites..." style="width:100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" rows="3"></textarea>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">Start Date & Time</label>
+                <input type="datetime-local" name="start_datetime" style="width:100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" required>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">End Date & Time (Optional)</label>
+                <input type="datetime-local" name="end_datetime" style="width:100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">Location / Venue</label>
+                <input type="text" name="location" placeholder="e.g. FCM Lab 3 or MS Teams" style="width:100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">Maximum Capacity</label>
+                <input type="number" name="capacity" placeholder="e.g. 50" style="width:100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <button type="submit" style="width:100%; padding:12px; background: #27ae60; color: white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 1rem;">Create Event</button>
+        </form>
+        
+        <br>
+        <div style="text-align: center;">
+            <a href="{{ url_for('events.dashboard') }}" style="color: #27ae60; text-decoration: none; font-size: 0.9rem;">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
 {% endblock %}
